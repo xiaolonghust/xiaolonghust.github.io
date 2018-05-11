@@ -1,0 +1,1081 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="baidu-site-verification" content="gEmq4LqCfE" />
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="时序数据,InfluxDB," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="NO WAY OUT | 无往不前" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="基于InfluxDB 1.2版本  数据管理创建数据库1CREATE DATABASE &amp;lt;database_name&amp;gt; [WITH [DURATION &amp;lt;duration&amp;gt;] [REPLICATION &amp;lt;n&amp;gt;] [SHARD DURATION &amp;lt;duration&amp;gt;] [NAME &amp;lt;retention-policy-name&amp;gt;]] 语法解">
+<meta name="keywords" content="时序数据,InfluxDB">
+<meta property="og:type" content="article">
+<meta property="og:title" content="InfluxDB数据库管理">
+<meta property="og:url" content="http://xiaolong.li/2017/06/17/TSDB-INFLUXDB-DBManagement/index.html">
+<meta property="og:site_name" content="NO WAY OUT | 无往不前">
+<meta property="og:description" content="基于InfluxDB 1.2版本  数据管理创建数据库1CREATE DATABASE &amp;lt;database_name&amp;gt; [WITH [DURATION &amp;lt;duration&amp;gt;] [REPLICATION &amp;lt;n&amp;gt;] [SHARD DURATION &amp;lt;duration&amp;gt;] [NAME &amp;lt;retention-policy-name&amp;gt;]] 语法解">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-05-11T15:41:00.093Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="InfluxDB数据库管理">
+<meta name="twitter:description" content="基于InfluxDB 1.2版本  数据管理创建数据库1CREATE DATABASE &amp;lt;database_name&amp;gt; [WITH [DURATION &amp;lt;duration&amp;gt;] [REPLICATION &amp;lt;n&amp;gt;] [SHARD DURATION &amp;lt;duration&amp;gt;] [NAME &amp;lt;retention-policy-name&amp;gt;]] 语法解">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '15JA050R1L',
+      apiKey: 'ff9dc354be91990420098318f9ab2839',
+      indexName: 'xiaolong-li',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"请输出关键信息","hits_empty":"未发现与 <strong>${query}</strong> 相关的文章","hits_stats":"${hits} 条结果被找到,耗时 ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://xiaolong.li/2017/06/17/TSDB-INFLUXDB-DBManagement/"/>
+
+
+
+
+
+  <title>InfluxDB数据库管理 | NO WAY OUT | 无往不前</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?8294053e6bf66d26def61b1899166d5e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">NO WAY OUT | 无往不前</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-projecteuler">
+          <a href="/Project-Euler" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-book"></i> <br />
+            
+            欧拉计划
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xiaolong.li/2017/06/17/TSDB-INFLUXDB-DBManagement/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xiaolong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars1.githubusercontent.com/u/23634042?v=3&s=460">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NO WAY OUT | 无往不前">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">InfluxDB数据库管理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-17T11:43:43+08:00">
+                2017-06-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/数据库/" itemprop="url" rel="index">
+                    <span itemprop="name">数据库</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a class="cloud-tie-join-count" href="/2017/06/17/TSDB-INFLUXDB-DBManagement/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count join-count" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv">本文阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>基于InfluxDB 1.2版本</p>
+</blockquote>
+<h2 id="数据管理"><a href="#数据管理" class="headerlink" title="数据管理"></a>数据管理</h2><h3 id="创建数据库"><a href="#创建数据库" class="headerlink" title="创建数据库"></a>创建数据库</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE DATABASE &lt;database_name&gt; [WITH [DURATION &lt;duration&gt;] [REPLICATION &lt;n&gt;] [SHARD DURATION &lt;duration&gt;] [NAME &lt;retention-policy-name&gt;]]</span><br></pre></td></tr></table></figure>
+<h4 id="语法解析"><a href="#语法解析" class="headerlink" title="语法解析"></a>语法解析</h4><p>和其他数据库一样，使用CREATE DATABASE去创建一个数据库。<br>database_name是数据库名称。<br>创建数据库时可以为该数据库创建数据保留策略，WITH, DURATION, REPLICATION, SHARD DURATION, 和 NAME是用来创建新的策略，如果没有指定创建数据保留策略，则会使用默认策略，InfluxDB默认会为每一个数据库创建一个名为autogen的数据保留策略。</p>
+<a id="more"></a>
+<h4 id="Example-1：创建一个数据库"><a href="#Example-1：创建一个数据库" class="headerlink" title="Example 1：创建一个数据库"></a>Example 1：创建一个数据库</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE DATABASE &quot;NOAA_water_database&quot;</span><br></pre></td></tr></table></figure>
+<p>这条语句会创建一个名为NOAA_water_database的数据库，并使用默认的数据保留策略</p>
+<h4 id="Example-2：创建一个指定数据保留策略的数据库"><a href="#Example-2：创建一个指定数据保留策略的数据库" class="headerlink" title="Example 2：创建一个指定数据保留策略的数据库"></a>Example 2：创建一个指定数据保留策略的数据库</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE DATABASE &quot;NOAA_water_database&quot; WITH DURATION 3d REPLICATION 1 SHARD DURATION 1h NAME &quot;liquid&quot;</span><br></pre></td></tr></table></figure>
+<p>这条语句会创建一个名为NOAA_water_database的数据库，并为其指定一个[过期时间为3天，副本集数为1，SHARDGROUP时间为1小时，名为liquid]的数据保留策略。</p>
+<blockquote>
+<p>当成功执行一个创建数据库语句时，InfluxDB会返回一个空的结果。并且当试图去创建一个已经存在的数据库时，InfluxDB什么都不会做，当然也不会返回错误信息。</p>
+</blockquote>
+<h3 id="删除数据库"><a href="#删除数据库" class="headerlink" title="删除数据库"></a>删除数据库</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP DATABASE &lt;database_name&gt;</span><br></pre></td></tr></table></figure>
+<h4 id="语法说明"><a href="#语法说明" class="headerlink" title="语法说明"></a>语法说明</h4><p>当执行删除数据库的操作成功时，会删除指定数据库中的所有信息，包括 measurements, series, continuous queries, 和 retention policies等。</p>
+<h4 id="Example：删除数据库"><a href="#Example：删除数据库" class="headerlink" title="Example：删除数据库"></a>Example：删除数据库</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP DATABASE &quot;NOAA_water_database&quot;</span><br></pre></td></tr></table></figure>
+<p>这条语句会删除名为NOAA_water_database的数据库。</p>
+<blockquote>
+<p>当成功执行删除数据库的操作时，InfluxDB会返回一个空的结果。并且当试图去删除一个不存在的数据库时，InfluxDB什么都不会做，当然也不会返回错误信息。</p>
+</blockquote>
+<h3 id="通过DROP-SERIES删除数据"><a href="#通过DROP-SERIES删除数据" class="headerlink" title="通过DROP SERIES删除数据"></a>通过DROP SERIES删除数据</h3><blockquote>
+<p>通过DROP SERIES可以删除一个数据库来自同一个Series的所有Point，并从索引中删除Series。但是它不支持在where从句中使用时间区间[time intervals]。</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP SERIES FROM &lt;measurement_name[,measurement_name]&gt; WHERE &lt;tag_key&gt;=&apos;&lt;tag_value&gt;&apos;</span><br></pre></td></tr></table></figure>
+<h4 id="语法说明-1"><a href="#语法说明-1" class="headerlink" title="语法说明"></a>语法说明</h4><p>当这条语句执行成功时，会删除所有符合条件的Point</p>
+<h4 id="Example-1：删除一个表中所有Series"><a href="#Example-1：删除一个表中所有Series" class="headerlink" title="Example 1：删除一个表中所有Series"></a>Example 1：删除一个表中所有Series</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP SERIES FROM &quot;h2o_feet&quot;</span><br></pre></td></tr></table></figure>
+<p>这条语句执行成功时，会删除h2o_feet中所有序列</p>
+<h4 id="Example-2：通过指定tag删除一个表中的Series"><a href="#Example-2：通过指定tag删除一个表中的Series" class="headerlink" title="Example 2：通过指定tag删除一个表中的Series"></a>Example 2：通过指定tag删除一个表中的Series</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP SERIES FROM &quot;h2o_feet&quot; WHERE &quot;location&quot; = &apos;santa_monica&apos;</span><br></pre></td></tr></table></figure>
+<p>这条语句执行成功时，会删除h2o_feet中location为santa_monica的所有序列</p>
+<h4 id="Example-3：删除数据库中所有Measurement表中指定tag的所Series"><a href="#Example-3：删除数据库中所有Measurement表中指定tag的所Series" class="headerlink" title="Example 3：删除数据库中所有Measurement表中指定tag的所Series"></a>Example 3：删除数据库中所有Measurement表中指定tag的所Series</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP SERIES WHERE &quot;location&quot; = &apos;santa_monica&apos;</span><br></pre></td></tr></table></figure>
+<p>这条语句执行成功时，会删除库中包含所有表中location为santa_monica的所有序列</p>
+<blockquote>
+<p>成功执行DROP SERIES语句返回一个空的结果</p>
+</blockquote>
+<h3 id="通过DELETE-SERIES删除数据"><a href="#通过DELETE-SERIES删除数据" class="headerlink" title="通过DELETE SERIES删除数据"></a>通过DELETE SERIES删除数据</h3><blockquote>
+<p>通过DELETE可以删除一个数据库来自同一个Series的所有Point，与DROP SERIES不同，它不能从索引中删除Series。但是它支持在where从句中使用时间区间[time intervals]。</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DELETE FROM &lt;measurement_name&gt; WHERE [&lt;tag_key&gt;=&apos;&lt;tag_value&gt;&apos;] | [&lt;time interval&gt;]</span><br></pre></td></tr></table></figure>
+<h4 id="语法说明-2"><a href="#语法说明-2" class="headerlink" title="语法说明"></a>语法说明</h4><p>当这条语句执行成功时，会删除所有符合条件的Point，它支持在WHERE从句中使用时间区间[time intervals]</p>
+<h4 id="Example-1：删除表中所有数据"><a href="#Example-1：删除表中所有数据" class="headerlink" title="Example 1：删除表中所有数据"></a>Example 1：删除表中所有数据</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DELETE FROM &quot;h2o_feet&quot;</span><br></pre></td></tr></table></figure>
+<p>这条语句执行成功后，会清空表h2o_feet中所有数据，并且删除表h2o_feet</p>
+<h4 id="Example-2：通过指定tag值删除数据"><a href="#Example-2：通过指定tag值删除数据" class="headerlink" title="Example 2：通过指定tag值删除数据"></a>Example 2：通过指定tag值删除数据</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DELETE FROM &quot;h2o_quality&quot; WHERE &quot;randtag&quot; = &apos;3&apos;</span><br></pre></td></tr></table></figure>
+<p>这条语句执行成功后，会删除表h2o_quality中randtag为3的所有数据</p>
+<h4 id="Example-3：通过指定时间区间删除数据"><a href="#Example-3：通过指定时间区间删除数据" class="headerlink" title="Example 3：通过指定时间区间删除数据"></a>Example 3：通过指定时间区间删除数据</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DELETE WHERE time &lt; &apos;2016-01-01&apos;</span><br></pre></td></tr></table></figure>
+<p>这条语句执行成功后，会删除数据库中在2016-01-01之前的所有数据</p>
+<blockquote>
+<p>DELETE语句执行成功后会返回一个空的结果</p>
+</blockquote>
+<h4 id="关于DELETE要注意的几点："><a href="#关于DELETE要注意的几点：" class="headerlink" title="关于DELETE要注意的几点："></a>关于DELETE要注意的几点：</h4><ol>
+<li>当指定Measurement时，在WHERE从句中使用tag进行操作时，可以使用正则表达式</li>
+<li>DELETE语句在WHERE从句中不支持使用Field字段</li>
+<li></li>
+</ol>
+<h3 id="删除表"><a href="#删除表" class="headerlink" title="删除表"></a>删除表</h3><blockquote>
+<p>通过DROP MEASUREMENT可以从指定的Measurement表中删除所有数据以及Series，并且从索引中删除measuerment</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP MEASUREMENT &lt;measurement_name&gt;</span><br></pre></td></tr></table></figure>
+<h4 id="语法说明-3"><a href="#语法说明-3" class="headerlink" title="语法说明"></a>语法说明</h4><p>通过制定Measurement名称删除表中所有数据</p>
+<h4 id="Example：删除指定表"><a href="#Example：删除指定表" class="headerlink" title="Example：删除指定表"></a>Example：删除指定表</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP MEASUREMENT &quot;h2o_feet&quot;</span><br></pre></td></tr></table></figure>
+<p>这条语句执行成功后，可以删除h2o_feet中所有数据，并且从索引中删除</p>
+<blockquote>
+<p>DROP MEASUREMENT语句执行成功后会返回一个空的结果</p>
+</blockquote>
+<h4 id="关于DROP-MEASUREMENT要注意的几点："><a href="#关于DROP-MEASUREMENT要注意的几点：" class="headerlink" title="关于DROP MEASUREMENT要注意的几点："></a>关于DROP MEASUREMENT要注意的几点：</h4><ol>
+<li>DROP MEASUREMENT可以删除指定Measurement中的所有数据以及Series，但是不能删除与之相关的连续查询[continuous queries]</li>
+<li>目前， DROP MEASUREMENT删除指定Measurement时，不能使用正则表达式</li>
+</ol>
+<h3 id="DROP-SHARD"><a href="#DROP-SHARD" class="headerlink" title="DROP SHARD"></a>DROP SHARD</h3><blockquote>
+<p>通过DROP SHARD可以删除一个shard，也可以从元数据中删除这个shard</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP SHARD &lt;shard_id_number&gt;</span><br></pre></td></tr></table></figure>
+<h4 id="语法说明-4"><a href="#语法说明-4" class="headerlink" title="语法说明"></a>语法说明</h4><p>通过制定shard_id来删除指定shard</p>
+<h4 id="Example："><a href="#Example：" class="headerlink" title="Example："></a>Example：</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP SHARD 1</span><br></pre></td></tr></table></figure>
+<p>这条语句执行成功后，可以删除id为1的shard，并从元数据中删除该shard</p>
+<blockquote>
+<p>DROP SHARD语句执行成功后会返回一个空的结果，即使指定的shard_id不存在，InfluxDB也不会返回一个错误信息</p>
+</blockquote>
+<h2 id="数据保留策略-RETENTION-POLICY"><a href="#数据保留策略-RETENTION-POLICY" class="headerlink" title="数据保留策略[RETENTION POLICY]"></a>数据保留策略[RETENTION POLICY]</h2><p>RETENTION POLICY : 数据保留策略，也叫数据过期策略，是InfluxDB的一个非常重要的概念。数据保留策略是用来定义数据的存放时长，或者是保留某一时间段的数据。每个数据库可以有多个数据保留策略，但只能有一个默认策略。定义数据保留策略是要让InfluxDB知道在什么时候可以丢弃那些很久以前数据，从而达到简单高效的处理数据。</p>
+<p>当新创建一个数据库时，InfluxDB会自动为该数据库创建一个名为aotugen的不限过期时间的策略。你也可以在InfluxDB的配置文件中制定这个默认策略的名称，或者禁用自动创建。</p>
+<h3 id="创建一个策略"><a href="#创建一个策略" class="headerlink" title="创建一个策略"></a>创建一个策略</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE RETENTION POLICY &lt;retention_policy_name&gt; ON &lt;database_name&gt; DURATION &lt;duration&gt; REPLICATION &lt;n&gt; [SHARD DURATION &lt;duration&gt;] [DEFAULT]</span><br></pre></td></tr></table></figure>
+<h4 id="语法说明-5"><a href="#语法说明-5" class="headerlink" title="语法说明"></a>语法说明</h4><p>使用CREATE RETENTION POLICY可以创建一个指定策略名[retention_policy_name]，在一个指定的数据库[database_name]上，指定数据保留时间[duration]，副本集数[n]，SHARDGROUP时间[SHARD DURATION <duration>]，以及是否要作为该数据库的默认策略[DEFAULT]，其中，在创建策略时，SHARD DURATION时间和是否是默认策略可以不指定。</duration></p>
+<h5 id="DURATION"><a href="#DURATION" class="headerlink" title="DURATION"></a>DURATION</h5><p>DURATION定义了在InfluxDB上数据可以保留的时间，是一个时间区域或者是无限期。最小的保留时间是1小时[1h]，最大的保留时间为无限期[0]。该字段单位可以是小时(如2h)，也可以是天(如3d)，当该字段值为0时，表示数据无过期时间，将无限期保留。</p>
+<h5 id="REPLICATION"><a href="#REPLICATION" class="headerlink" title="REPLICATION"></a>REPLICATION</h5><p>REPLICATION定义了在InfluxDB上数据的副本集数，n表示副本集节点的个数。</p>
+<blockquote>
+<p>目前使用InfluxDB都是单实例</p>
+</blockquote>
+<h5 id="SHARD-DURATION"><a href="#SHARD-DURATION" class="headerlink" title="SHARD DURATION"></a>SHARD DURATION</h5><p>SHARD DURATION定义在InfluxDB上一个shardGroup上数据的时间范围，但是不支持无限制时间范围，这是一个可选项，如果不指定，它会根据数据保留时间确定其时间范围，具体对应关键见下表：</p>
+<table>
+<thead>
+<tr>
+<th>Retention Policy’s DURATION</th>
+<th>Shard Group Duration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt; 2day</td>
+<td>1h</td>
+</tr>
+<tr>
+<td>&gt;= 2 days and &lt;= 6 months</td>
+<td>1 day</td>
+</tr>
+<tr>
+<td>&gt; 6 months</td>
+<td>7 days</td>
+</tr>
+</tbody>
+</table>
+<p>SHARD DURATION最小被允许的值是1h。<br>如果在创建一个策略时，试图将SHARD DURATION的值设为(0s, 1h)区间的值，InfluxDB会自动将其设置为1h。<br>如果在创建一个策略时，试图将SHARD DURATION的值设为0s，InfluxDB会自动按上述默认值设置。</p>
+<h4 id="Example-1：创建策略"><a href="#Example-1：创建策略" class="headerlink" title="Example 1：创建策略"></a>Example 1：创建策略</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE RETENTION POLICY &quot;one_day_only&quot; ON &quot;NOAA_water_database&quot; DURATION 1d REPLICATION 1</span><br></pre></td></tr></table></figure>
+<p>执行这条语句，将会为名为NOAA_water_database的数据库，创建一个名为one_day_only的数据保留策略，该策略数据保留时间为一天，副本集数为1</p>
+<h4 id="Example-2：创建默认策略"><a href="#Example-2：创建默认策略" class="headerlink" title="Example 2：创建默认策略"></a>Example 2：创建默认策略</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE RETENTION POLICY &quot;one_day_only&quot; ON &quot;NOAA_water_database&quot; DURATION 23h60m REPLICATION 1 DEFAULT</span><br></pre></td></tr></table></figure>
+<p>执行这条语句，会创建一个和Example 1一样的策略，但是该策略将作为数据库NOAA_water_database的默认策略</p>
+<blockquote>
+<p>成功创建一个策略会返回一个空的结果。如果试图去创建一个已经存在并且一样的策略，InfluxDB不会返回错误的结果。但是如果试图去创建一个策略名存在，属性不一样的策略时，这时InfluxDB会返回一个错误的结果[Server returned error: retention policy already exists]。</p>
+</blockquote>
+<h3 id="修改策略"><a href="#修改策略" class="headerlink" title="修改策略"></a>修改策略</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER RETENTION POLICY &lt;retention_policy_name&gt; ON &lt;database_name&gt; DURATION &lt;duration&gt; REPLICATION &lt;n&gt; SHARD DURATION &lt;duration&gt; DEFAULT</span><br></pre></td></tr></table></figure>
+<h4 id="语法说明-6"><a href="#语法说明-6" class="headerlink" title="语法说明"></a>语法说明</h4><p>使用ALTER RETENTION POLICY修改一个策略时，必须至少指定修改策略属性[DURATION, REPLICATION, SHARD DURATION, DEFAULT]中的一个。</p>
+<h4 id="Example：修改策略"><a href="#Example：修改策略" class="headerlink" title="Example：修改策略"></a>Example：修改策略</h4><p>首先创建一个策略:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE RETENTION POLICY &quot;what_is_time&quot; ON &quot;NOAA_water_database&quot; DURATION 2d REPLICATION 1</span><br></pre></td></tr></table></figure></p>
+<p>这条语句为数据库NOAA_water_database建立一个名为what_is_time，数据保留时间为2天，副本集数为1的策略。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER RETENTION POLICY &quot;what_is_time&quot; ON &quot;NOAA_water_database&quot; DURATION 7d SHARD DURATION 2h DEFAULT</span><br></pre></td></tr></table></figure></p>
+<p>这条语句将数据库NOAA_water_database上的策略what_is_time的数据保留时间修改为7天，SHARD DURATION修改为2小时，并且作为将数据库NOAA_water_database默认策略。</p>
+<blockquote>
+<p>ALTER RETENTION POLICY语句执行成功后，InfluxDB会返回一个空的结果。如果试图去修改一个不存在的策略，InfluxDB会返回错误信息[Server returned error: retention policy not found: what_is_time_2]。</p>
+</blockquote>
+<h3 id="删除策略"><a href="#删除策略" class="headerlink" title="删除策略"></a>删除策略</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP RETENTION POLICY &lt;retention_policy_name&gt; ON &lt;database_name&gt;</span><br></pre></td></tr></table></figure>
+<h4 id="语法说明-7"><a href="#语法说明-7" class="headerlink" title="语法说明"></a>语法说明</h4><p>DROP RETENTION POLICY可以删除指定数据库上的指定策略</p>
+<h4 id="Example：删除指定策略"><a href="#Example：删除指定策略" class="headerlink" title="Example：删除指定策略"></a>Example：删除指定策略</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP RETENTION POLICY &quot;what_is_time&quot; ON &quot;NOAA_water_database&quot;</span><br></pre></td></tr></table></figure>
+<p>执行这条语句，会将数据库NOAA_water_database上名为what_is_time的策略删除</p>
+<blockquote>
+<p>DROP RETENTION POLICY语句执行成功后，InfluxDB会返回一个空的结果。如果试图去删除一个不存在的策略，InfluxDB也不会返回错误的信息。</p>
+</blockquote>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/images/reward/wechat_reward_image.png" alt="xiaolong WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/images/reward/alipay_reward_image.png" alt="xiaolong Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <div>
+      
+        
+  <ul class="post-copyright">
+    <li class="post-copyright-author">
+      <strong>本文作者：</strong>
+      xiaolong
+    </li>
+    <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="http://xiaolong.li/2017/06/17/TSDB-INFLUXDB-DBManagement/" title="InfluxDB数据库管理">http://xiaolong.li/2017/06/17/TSDB-INFLUXDB-DBManagement/</a>
+    </li>
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong>
+      本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/时序数据/" rel="tag"># 时序数据</a>
+          
+            <a href="/tags/InfluxDB/" rel="tag"># InfluxDB</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/06/09/TSDB-INFLUXDB-Key-Features/" rel="next" title="InfluxDB的关键特性">
+                <i class="fa fa-chevron-left"></i> InfluxDB的关键特性
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/26/You-Do-Not-Know-Java_Integer/" rel="prev" title="你不知道的Java - 之Integer类">
+                你不知道的Java - 之Integer类 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!--MOB SHARE BEGIN-->
+<div class="-mob-share-ui-button -mob-share-open">分享</div>
+<div class="-mob-share-ui" style="display: none">
+    <ul class="-mob-share-list">
+        <li class="-mob-share-weibo"><p>新浪微博</p></li>
+        <li class="-mob-share-weixin"><p>微信</p></li>
+        <li class="-mob-share-douban"><p>豆瓣</p></li>
+        <li class="-mob-share-youdao"><p>有道云笔记</p></li>
+        <li class="-mob-share-tencentweibo"><p>腾讯微博</p></li>
+        <li class="-mob-share-qzone"><p>QQ空间</p></li>
+        <li class="-mob-share-qq"><p>QQ好友</p></li>
+        <li class="-mob-share-renren"><p>人人网</p></li>
+        <li class="-mob-share-kaixin"><p>开心网</p></li>
+        <li class="-mob-share-facebook"><p>Facebook</p></li>
+        <li class="-mob-share-twitter"><p>Twitter</p></li>
+        <li class="-mob-share-google"><p>Google+</p></li>
+        <li class="-mob-share-linkedin"><p>LinkedIn</p></li>
+    </ul>
+    <div class="-mob-share-close">取消</div>
+</div>
+<div class="-mob-share-ui-bg"></div>
+<script id="-mob-share" src="http://f1.webshare.mob.com/code/mob-share.js?appkey=1e95ddd86b95d"></script>
+<!--MOB SHARE END-->    
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://avatars1.githubusercontent.com/u/23634042?v=3&s=460"
+               alt="xiaolong" />
+          <p class="site-author-name" itemprop="name">xiaolong</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/xiaolonghust" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/l_chn" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/645582316" target="_blank" title="weibo">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  weibo
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.linkedin.com/in/xiaolong-li-981b27a1" target="_blank" title="LinkedIn">
+                  
+                    <i class="fa fa-fw fa-linkedin"></i>
+                  
+                  LinkedIn
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#数据管理"><span class="nav-number">1.</span> <span class="nav-text">数据管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建数据库"><span class="nav-number">1.1.</span> <span class="nav-text">创建数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#语法解析"><span class="nav-number">1.1.1.</span> <span class="nav-text">语法解析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-1：创建一个数据库"><span class="nav-number">1.1.2.</span> <span class="nav-text">Example 1：创建一个数据库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-2：创建一个指定数据保留策略的数据库"><span class="nav-number">1.1.3.</span> <span class="nav-text">Example 2：创建一个指定数据保留策略的数据库</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除数据库"><span class="nav-number">1.2.</span> <span class="nav-text">删除数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#语法说明"><span class="nav-number">1.2.1.</span> <span class="nav-text">语法说明</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example：删除数据库"><span class="nav-number">1.2.2.</span> <span class="nav-text">Example：删除数据库</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通过DROP-SERIES删除数据"><span class="nav-number">1.3.</span> <span class="nav-text">通过DROP SERIES删除数据</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#语法说明-1"><span class="nav-number">1.3.1.</span> <span class="nav-text">语法说明</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-1：删除一个表中所有Series"><span class="nav-number">1.3.2.</span> <span class="nav-text">Example 1：删除一个表中所有Series</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-2：通过指定tag删除一个表中的Series"><span class="nav-number">1.3.3.</span> <span class="nav-text">Example 2：通过指定tag删除一个表中的Series</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-3：删除数据库中所有Measurement表中指定tag的所Series"><span class="nav-number">1.3.4.</span> <span class="nav-text">Example 3：删除数据库中所有Measurement表中指定tag的所Series</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通过DELETE-SERIES删除数据"><span class="nav-number">1.4.</span> <span class="nav-text">通过DELETE SERIES删除数据</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#语法说明-2"><span class="nav-number">1.4.1.</span> <span class="nav-text">语法说明</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-1：删除表中所有数据"><span class="nav-number">1.4.2.</span> <span class="nav-text">Example 1：删除表中所有数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-2：通过指定tag值删除数据"><span class="nav-number">1.4.3.</span> <span class="nav-text">Example 2：通过指定tag值删除数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-3：通过指定时间区间删除数据"><span class="nav-number">1.4.4.</span> <span class="nav-text">Example 3：通过指定时间区间删除数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#关于DELETE要注意的几点："><span class="nav-number">1.4.5.</span> <span class="nav-text">关于DELETE要注意的几点：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除表"><span class="nav-number">1.5.</span> <span class="nav-text">删除表</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#语法说明-3"><span class="nav-number">1.5.1.</span> <span class="nav-text">语法说明</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example：删除指定表"><span class="nav-number">1.5.2.</span> <span class="nav-text">Example：删除指定表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#关于DROP-MEASUREMENT要注意的几点："><span class="nav-number">1.5.3.</span> <span class="nav-text">关于DROP MEASUREMENT要注意的几点：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DROP-SHARD"><span class="nav-number">1.6.</span> <span class="nav-text">DROP SHARD</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#语法说明-4"><span class="nav-number">1.6.1.</span> <span class="nav-text">语法说明</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example："><span class="nav-number">1.6.2.</span> <span class="nav-text">Example：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据保留策略-RETENTION-POLICY"><span class="nav-number">2.</span> <span class="nav-text">数据保留策略[RETENTION POLICY]</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建一个策略"><span class="nav-number">2.1.</span> <span class="nav-text">创建一个策略</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#语法说明-5"><span class="nav-number">2.1.1.</span> <span class="nav-text">语法说明</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#DURATION"><span class="nav-number">2.1.1.1.</span> <span class="nav-text">DURATION</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#REPLICATION"><span class="nav-number">2.1.1.2.</span> <span class="nav-text">REPLICATION</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SHARD-DURATION"><span class="nav-number">2.1.1.3.</span> <span class="nav-text">SHARD DURATION</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-1：创建策略"><span class="nav-number">2.1.2.</span> <span class="nav-text">Example 1：创建策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-2：创建默认策略"><span class="nav-number">2.1.3.</span> <span class="nav-text">Example 2：创建默认策略</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#修改策略"><span class="nav-number">2.2.</span> <span class="nav-text">修改策略</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#语法说明-6"><span class="nav-number">2.2.1.</span> <span class="nav-text">语法说明</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example：修改策略"><span class="nav-number">2.2.2.</span> <span class="nav-text">Example：修改策略</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除策略"><span class="nav-number">2.3.</span> <span class="nav-text">删除策略</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#语法说明-7"><span class="nav-number">2.3.1.</span> <span class="nav-text">语法说明</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example：删除指定策略"><span class="nav-number">2.3.2.</span> <span class="nav-text">Example：删除指定策略</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2017 - 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xiaolong</span>
+</div>
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+
+  
+    <span class="site-pv">
+      <div class="stats_pv">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      </div>since 2017
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+    <script>
+      var cloudTieConfig = {
+        url: document.location.href, 
+        sourceId: "",
+        productKey: "0325978d006946d28c5cf50a9421bdbb",
+        target: "cloud-tie-wrapper"
+      };
+    </script>
+    <script src="https://img1.ws.126.net/f2e/tie/yun/sdk/loader.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.1"></script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
